@@ -1,5 +1,6 @@
 package io.github.nwmafywf.clickcounter
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,7 +17,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import io.github.nwmafywf.clickcounter.ui.theme.ClickCounterTheme
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+
+// 为 Context 添加 DataStore 扩展属性
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "counter_preferences")
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,8 +41,21 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun CounterApp() {
-    // 声明 count 是可变状态，且初始值为 0
+    // 获取 Context 用于访问 DataStore
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+
+    // 定义用于存储计数的键
+    val counterKey = intPreferencesKey("counter_key")
+
+    // 使用 State 来持有当前计数
     var count by remember { mutableStateOf(0) }
+
+    // 从 DataStore 读取初始计数
+    LaunchedEffect(Unit) {
+        val preferences = context.dataStore.data.first()
+        count = preferences[counterKey] ?: 0
+    }
 
     // UI 布局
     Column(
@@ -57,7 +82,15 @@ fun CounterApp() {
         Spacer(modifier = Modifier.height(16.dp))
 
         // 点击增加计数的按钮
-        Button(onClick = { count++ }) {
+        Button(onClick = {
+            count++
+            // 同时更新 DataStore
+            scope.launch {
+                context.dataStore.edit { preferences ->
+                    preferences[counterKey] = count
+                }
+            }
+        }) {
             Text("Click here")
         }
     }
