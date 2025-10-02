@@ -1,15 +1,12 @@
-*.iml                           # IntelliJ IDEA 配置文件
-.gradle                         # Gradle 缓存目录
-/local.properties               # 本地 SDK 配置
-/.idea/caches                   # IDE 缓存
-/.idea/libraries                # IDE 库配置
-/.idea/modules.xml              # 模块配置
-/.idea/workspace.xml            # 工作区配置
-/.idea/navEditor.xml            # Android Studio 导航编辑器的配置
-/.idea/assetWizardSettings.xml  # Asset Studio 向导的设置
-.DS_Store                       # macOS 系统文件
-/build                          # 编译输出目录
-/captures                       # Android Studio 截图
-.externalNativeBuild            # C++ 构建文件
-.cxx                            # C++ 相关文件
-local.properties                # 本地 SDK 配置
+*.iml                           
+.gradle                         
+/local.properties               
+!.idea/.gitignore
+!.idea/runConfigurations.xml
+!.idea/codeStyles/
+.DS_Store                       
+/build                          
+/captures                       
+.externalNativeBuild            
+.cxx                            
+local.properties                
