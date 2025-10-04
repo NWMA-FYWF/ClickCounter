@@ -64,8 +64,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
 
@@ -81,7 +81,7 @@ jobs:
             if [ -n "$apk_file" ]; then
               asset_name=$(basename "$apk_file")
               echo "Uploading $asset_name..."
-              gh release upload ${{ github.ref }} "$apk_file" --clobber
+              gh release upload ${{ github.ref_name }} "$apk_file" --clobber
             fi
           done < apk_list.txt
         env:
