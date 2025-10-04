@@ -38,19 +38,20 @@ android {
         }
     }
 
-    val keystorePropertiesFile = rootProject.file("keystore.properties")
-    val keystoreProperties = Properties().apply {
-        if (keystorePropertiesFile.exists()) {
-            load(FileInputStream(keystorePropertiesFile))
-        }
-    }
-
     signingConfigs {
         create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as? String ?: "upload"
-            keyPassword = keystoreProperties["keyPassword"] as? String ?: ""
-            storeFile = file(keystoreProperties["storeFile"] as? String ?: "not-set")
-            storePassword = keystoreProperties["storePassword"] as? String ?: ""
+            // 优先使用环境变量（CI/CD 环境），如果没有则从 keystore.properties 文件读取（本地开发环境）
+            val keystorePropertiesFile = rootProject.file("keystore.properties")
+            val keystoreProperties = Properties().apply {
+                if (keystorePropertiesFile.exists()) {
+                    load(FileInputStream(keystorePropertiesFile))
+                }
+            }
+            
+            keyAlias = System.getenv("KEY_ALIAS") ?: (keystoreProperties["keyAlias"] as? String ?: "upload")
+            keyPassword = System.getenv("KEY_PASSWORD") ?: (keystoreProperties["keyPassword"] as? String ?: "")
+            storeFile = file(System.getenv("KEYSTORE_PATH") ?: (keystoreProperties["storeFile"] as? String ?: "../keystore.jks"))
+            storePassword = System.getenv("KEY_STORE_PASSWORD") ?: (keystoreProperties["storePassword"] as? String ?: "")
         }
     }
 
