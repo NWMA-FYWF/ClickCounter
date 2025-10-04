@@ -1,8 +1,17 @@
+import java.util.Properties
+import java.io.FileInputStream
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.ZoneId
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
+
+val beijingTime = LocalDate.now(ZoneId.of("Asia/Shanghai"))
+val buildDate = beijingTime.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
 
 android {
     namespace = "io.github.nwmafywf.clickcounter"
@@ -18,15 +27,53 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    applicationVariants.all {
+        outputs.map { output ->
+            if (output is com.android.build.gradle.internal.api.ApkVariantOutputImpl) {
+                val appName = "ClickCounter"
+                val version = versionName
+                val abi = output.getFilter(com.android.build.OutputFile.ABI) ?: "universal"
+                output.outputFileName = "${version}-${buildDate}-${appName}-${abi}.apk"
+            }
+        }
+    }
+
+    val keystorePropertiesFile = rootProject.file("keystore.properties")
+    val keystoreProperties = Properties().apply {
+        if (keystorePropertiesFile.exists()) {
+            load(FileInputStream(keystorePropertiesFile))
+        }
+    }
+
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as? String ?: "upload"
+            keyPassword = keystoreProperties["keyPassword"] as? String ?: ""
+            storeFile = file(keystoreProperties["storeFile"] as? String ?: "not-set")
+            storePassword = keystoreProperties["storePassword"] as? String ?: ""
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
     }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a")
+            isUniversalApk = true
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
