@@ -69,20 +69,23 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Find APK
+      - name: Find APKs
         run: |
           find app/build/outputs/apk/release -name "*.apk" -type f -exec ls -la {} \;
-          echo "APK_FILE=$(find app/build/outputs/apk/release -name "*.apk" -type f | head -n 1)" >> $GITHUB_ENV
-
-      - name: Upload APK to Release
-        uses: actions/upload-release-asset@v1
+          APK_FILES=$(find app/build/outputs/apk/release -name "*.apk" -type f)
+          echo "$APK_FILES" > apk_list.txt
+          
+      - name: Upload APKs to Release
+        run: |
+          while IFS= read -r apk_file; do
+            if [ -n "$apk_file" ]; then
+              asset_name=$(basename "$apk_file")
+              echo "Uploading $asset_name..."
+              gh release upload ${{ github.ref }} "$apk_file" --clobber
+            fi
+          done < apk_list.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ env.APK_FILE }}
-          asset_name: ${{ env.APK_FILE }}
-          asset_content_type: application/vnd.android.package-archive
 
       - name: Upload Bundle to Release
         uses: actions/upload-release-asset@v1
