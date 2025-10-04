@@ -35,12 +35,13 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun ClickCounterTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = isSystemInDarkTheme(), // 默认跟随系统 
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = true, // Material You 动态颜色 
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
+        // 如果启用动态颜色 ( Android 12+ ) 
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)

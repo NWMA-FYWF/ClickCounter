@@ -34,7 +34,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-           CounterApp() // 启动 Compose UI
+            ClickCounterTheme {
+                CounterApp() // 启动 Compose UI
+            }
         }
     }
 }
