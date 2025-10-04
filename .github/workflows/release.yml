@@ -25,21 +25,34 @@ jobs:
       - name: Make Gradle executable
         run: chmod +x ./gradlew
 
-      - name: Copy keystore.properties and verify
+      - name: Decode Keystore
         run: |
-          echo "Checking for keystore.properties file..."
-          if [ -f "keystore.properties" ]; then
-            echo "Found keystore.properties, copying to app directory"
-            cp keystore.properties app/
-            echo "Contents of keystore.properties (with sensitive info masked):"
-            sed 's/password.*/password=***masked***/i' keystore.properties || echo "keystore.properties copied"
-          else
-            echo "ERROR: keystore.properties file not found in root directory!"
-            exit 1
-          fi
+          echo "Decoding keystore file..."
+          echo "${{ secrets.SIGNING_KEY }}" | base64 -d > ${{ secrets.KEYSTORE_PATH }}
+          
+      - name: Create keystore.properties
+        run: |
+          echo "Creating keystore.properties file..."
+          cat <<EOF > keystore.properties
+          storeFile=${{ secrets.KEYSTORE_PATH }}
+          storePassword=${{ secrets.KEY_STORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
+          
+      - name: Copy keystore.properties to app directory
+        run: |
+          echo "Copying keystore.properties to app directory"
+          cp keystore.properties app/
 
       - name: Build Release APK and Bundle
         run: ./gradlew assembleRelease bundleRelease --no-daemon
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          KEYSTORE_PATH: ${{ secrets.KEYSTORE_PATH }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
