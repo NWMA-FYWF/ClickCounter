@@ -28,22 +28,23 @@ jobs:
       - name: Decode Keystore
         run: |
           echo "Decoding keystore file..."
-          echo "${{ secrets.SIGNING_KEY }}" | base64 -d > ${{ secrets.KEYSTORE_PATH }}
+          echo "${{ secrets.SIGNING_KEY }}" | base64 -d > keystore.jks
           
       - name: Create keystore.properties
         run: |
           echo "Creating keystore.properties file..."
           cat <<EOF > keystore.properties
-          storeFile=${{ secrets.KEYSTORE_PATH }}
+          storeFile=keystore.jks
           storePassword=${{ secrets.KEY_STORE_PASSWORD }}
           keyAlias=${{ secrets.KEY_ALIAS }}
           keyPassword=${{ secrets.KEY_PASSWORD }}
           EOF
           
-      - name: Copy keystore.properties to app directory
+      - name: Copy keystore files to app directory
         run: |
-          echo "Copying keystore.properties to app directory"
+          echo "Copying keystore files to app directory"
           cp keystore.properties app/
+          cp keystore.jks app/
 
       - name: Build Release APK and Bundle
         run: ./gradlew assembleRelease bundleRelease --no-daemon
