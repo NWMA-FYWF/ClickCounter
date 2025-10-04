@@ -50,8 +50,15 @@ android {
             
             keyAlias = System.getenv("KEY_ALIAS") ?: (keystoreProperties["keyAlias"] as? String ?: "upload")
             keyPassword = System.getenv("KEY_PASSWORD") ?: (keystoreProperties["keyPassword"] as? String ?: "")
-            storeFile = file(System.getenv("KEYSTORE_PATH") ?: (keystoreProperties["storeFile"] as? String ?: "../keystore.jks"))
             storePassword = System.getenv("KEY_STORE_PASSWORD") ?: (keystoreProperties["storePassword"] as? String ?: "")
+            
+            // 在 CI/CD 环境中，使用环境变量指定的 keystore 文件名
+            if (System.getenv("GITHUB_ACTIONS") == "true") {
+                storeFile = file(System.getenv("KEYSTORE_FILENAME") ?: "keystore.jks")
+            } else {
+                // 本地开发环境，使用 keystore.properties 中的路径
+                storeFile = file(System.getenv("KEYSTORE_PATH") ?: (keystoreProperties["storeFile"] as? String ?: "../keystore.jks"))
+            }
         }
     }
 
