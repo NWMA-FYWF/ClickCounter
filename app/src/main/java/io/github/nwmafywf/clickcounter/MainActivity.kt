@@ -26,6 +26,8 @@ import io.github.nwmafywf.clickcounter.ui.theme.ClickCounterTheme
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 // 为 Context 添加 DataStore 扩展属性
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "counter_preferences")
@@ -67,33 +69,34 @@ fun CounterApp() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // 显示文本
-        Text(
-            text = "CounterApp",
-            style = MaterialTheme.typography.headlineMedium
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         // 显示计数
         Text(
             text = "Count: $count",
-            style = MaterialTheme.typography.titleLarge
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontSize = 42.sp // 自定义字体大小
+            )
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // 点击增加计数的按钮
-        Button(onClick = {
-            count++
-            // 同时更新 DataStore
-            scope.launch {
-                context.dataStore.edit { preferences ->
-                    preferences[counterKey] = count
+        Button(
+            onClick = {
+                count++
+                // 同时更新 DataStore
+                scope.launch {
+                    context.dataStore.edit { preferences ->
+                        preferences[counterKey] = count
+                    }
                 }
-            }
-        }) {
-            Text("Click here")
+            }, shape = RoundedCornerShape(6.dp)
+        ) {
+            Text(
+                text = "Click here",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = 24.sp
+                )
+            )
         }
     }
 }
