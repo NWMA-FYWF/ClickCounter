@@ -40,23 +40,28 @@ android {
 
     signingConfigs {
         create("release") {
-            // 优先使用环境变量（CI/CD 环境），如果没有则从 keystore.properties 文件读取（本地开发环境）
-            val keystorePropertiesFile = rootProject.file("keystore.properties")
-            val keystoreProperties = Properties().apply {
-                if (keystorePropertiesFile.exists()) {
-                    load(FileInputStream(keystorePropertiesFile))
-                }
-            }
+            // 尝试从 Gradle 属性读取（用于 CI/CD 环境）
+            val signingKeyAlias = project.findProperty("android.signing.keyAlias") as String?
+            val signingKeyPassword = project.findProperty("android.signing.keyPassword") as String?
+            val signingStoreFile = project.findProperty("android.signing.storeFile") as String?
+            val signingStorePassword = project.findProperty("android.signing.storePassword") as String?
             
-            // 先判断是否在 CI 环境中
-            if (System.getenv("GITHUB_ACTIONS") == "true") {
-                // CI/CD 环境：使用从环境变量获取的值
-                keyAlias = System.getenv("KEY_ALIAS") ?: "upload"
-                keyPassword = System.getenv("KEY_PASSWORD") ?: ""
-                storeFile = file("keystore.jks")  // 固定文件名，工作流中已复制
-                storePassword = System.getenv("KEY_STORE_PASSWORD") ?: ""
+            if (signingKeyAlias != null && signingKeyPassword != null && 
+                signingStoreFile != null && signingStorePassword != null) {
+                // CI/CD 环境：使用 Gradle 属性传递的值
+                keyAlias = signingKeyAlias
+                keyPassword = signingKeyPassword
+                storeFile = file(rootDir, signingStoreFile)  // 使用 rootDir 确保正确路径
+                storePassword = signingStorePassword
             } else {
                 // 本地开发环境：使用 keystore.properties 中的值
+                val keystorePropertiesFile = rootProject.file("keystore.properties")
+                val keystoreProperties = Properties().apply {
+                    if (keystorePropertiesFile.exists()) {
+                        load(FileInputStream(keystorePropertiesFile))
+                    }
+                }
+                
                 keyAlias = keystoreProperties["keyAlias"] as? String ?: "upload"
                 keyPassword = keystoreProperties["keyPassword"] as? String ?: ""
                 storeFile = file(keystoreProperties["storeFile"] as? String ?: "../keystore.jks")
