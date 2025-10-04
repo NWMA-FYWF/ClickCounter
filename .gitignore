@@ -10,3 +10,24 @@
 .externalNativeBuild            
 .cxx                            
 local.properties                
+keystore.properties
+*.jks
+*.keystore
+
+# Android Studio (most contents should be ignored)
+.idea/
+
+# Android build outputs
+app/build/
+*.apk
+*.aab
+*.ap_
+!app/src/
+!app/build.gradle.kts
+
+# Generated files
+generated/
+gen/
+
+# Release folder
+app/release/
