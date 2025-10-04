@@ -51,7 +51,7 @@ android {
                 // CI/CD 环境：使用 Gradle 属性传递的值，文件已复制到 app 目录
                 keyAlias = signingKeyAlias
                 keyPassword = signingKeyPassword
-                storeFile = file(projectDir, signingStoreFile)  // 使用 projectDir (app 目录) 
+                storeFile = file("$projectDir/$signingStoreFile")  // 使用字符串插值构建路径
                 storePassword = signingStorePassword
             } else {
                 // 本地开发环境：使用 keystore.properties 中的值
