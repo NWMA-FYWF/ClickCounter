@@ -48,16 +48,19 @@ android {
                 }
             }
             
-            keyAlias = System.getenv("KEY_ALIAS") ?: (keystoreProperties["keyAlias"] as? String ?: "upload")
-            keyPassword = System.getenv("KEY_PASSWORD") ?: (keystoreProperties["keyPassword"] as? String ?: "")
-            storePassword = System.getenv("KEY_STORE_PASSWORD") ?: (keystoreProperties["storePassword"] as? String ?: "")
-            
-            // 在 CI/CD 环境中，使用环境变量指定的 keystore 文件名
+            // 先判断是否在 CI 环境中
             if (System.getenv("GITHUB_ACTIONS") == "true") {
-                storeFile = file(System.getenv("KEYSTORE_FILENAME") ?: "keystore.jks")
+                // CI/CD 环境：使用从环境变量获取的值
+                keyAlias = System.getenv("KEY_ALIAS") ?: "upload"
+                keyPassword = System.getenv("KEY_PASSWORD") ?: ""
+                storeFile = file("keystore.jks")  // 固定文件名，工作流中已复制
+                storePassword = System.getenv("KEY_STORE_PASSWORD") ?: ""
             } else {
-                // 本地开发环境，使用 keystore.properties 中的路径
-                storeFile = file(System.getenv("KEYSTORE_PATH") ?: (keystoreProperties["storeFile"] as? String ?: "../keystore.jks"))
+                // 本地开发环境：使用 keystore.properties 中的值
+                keyAlias = keystoreProperties["keyAlias"] as? String ?: "upload"
+                keyPassword = keystoreProperties["keyPassword"] as? String ?: ""
+                storeFile = file(keystoreProperties["storeFile"] as? String ?: "../keystore.jks")
+                storePassword = keystoreProperties["storePassword"] as? String ?: ""
             }
         }
     }
