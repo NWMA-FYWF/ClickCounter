@@ -46,6 +46,20 @@ jobs:
             -Pandroid.signing.storePassword="${{ secrets.KEY_STORE_PASSWORD }}" \
             --no-daemon
 
+      - name: Download bundletool
+        run: |
+          curl -L "https://github.com/google/bundletool/releases/latest/download/bundletool-all.jar" -o bundletool.jar
+
+      - name: Generate .apks from .aab
+        run: |
+          java -jar bundletool.jar build-apks \
+            --bundle=app/build/outputs/bundle/release/app-release.aab \
+            --output=app/build/outputs/bundle/release/app-release.apks \
+            --ks=keystore.jks \
+            --ks-key-alias="${{ secrets.KEY_ALIAS }}" \
+            --key-pass=pass:"${{ secrets.KEY_PASSWORD }}" \
+            --ks-pass=pass:"${{ secrets.KEY_STORE_PASSWORD }}"
+
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
@@ -96,3 +110,14 @@ jobs:
           asset_path: app/build/outputs/bundle/release/app-release.aab
           asset_name: ClickCounter-${{ github.ref_name }}.aab
           asset_content_type: application/zip
+      
+      - name: Upload APKS to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: app/build/outputs/bundle/release/app-release.apks
+          asset_name: ClickCounter-${{ github.ref_name }}.apks
+          asset_content_type: application/zip
+          
