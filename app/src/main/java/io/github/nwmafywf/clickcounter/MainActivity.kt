@@ -63,28 +63,54 @@ fun CounterApp() {
     }
 
     // UI 布局
-    Column(
+    Box (
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .padding(16.dp)
     ) {
-        // 显示计数
-        Text(
-            text = "Count: $count",
-            style = MaterialTheme.typography.titleLarge.copy(
-                fontSize = 42.sp // 自定义字体大小
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // 显示计数
+            Text(
+                text = "Count: $count",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = 42.sp // 自定义字体大小
+                )
             )
-        )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // 点击增加计数的按钮
+            // 点击增加计数的按钮
+            Button(
+                onClick = {
+                    count++
+                    // 同时更新 DataStore
+                    scope.launch {
+                        context.dataStore.edit { preferences ->
+                            preferences[counterKey] = count
+                        }
+                    }
+                },
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.size(64.dp), // 设置正方形大小
+                contentPadding = PaddingValues(0.dp) // 移除默认内边距
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.add_48px),
+                    contentDescription = "This is a add icon" // 用于无障碍访问，必填
+                )
+            }
+        }
+
+        // 点击重置计数的按钮
         Button(
             onClick = {
-                count++
-                // 同时更新 DataStore
+                count = 0
                 scope.launch {
                     context.dataStore.edit { preferences ->
                         preferences[counterKey] = count
@@ -92,12 +118,13 @@ fun CounterApp() {
                 }
             },
             shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.size(64.dp), // 设置正方形大小
-            contentPadding = PaddingValues(0.dp) // 移除默认内边距
+            modifier = Modifier
+                .size(42.dp).align(Alignment.BottomStart),
+            contentPadding = PaddingValues(0.dp)
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.add_48px),
-                contentDescription = "This is a add icon" // 用于无障碍访问，必填
+                painter = painterResource(id = R.drawable.delete_history_48px),
+                contentDescription = "This is a reset icon"
             )
         }
     }
