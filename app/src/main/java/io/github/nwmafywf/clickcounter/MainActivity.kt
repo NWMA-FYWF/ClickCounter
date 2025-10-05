@@ -78,9 +78,10 @@ fun CounterApp() {
         ) {
             // 显示计数
             Text(
-                text = "Count: $count",
+                text = "$count",
                 style = MaterialTheme.typography.titleLarge.copy(
-                    fontSize = 42.sp // 自定义字体大小
+                    fontSize = 52.sp, // 自定义字体大小
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             )
 
