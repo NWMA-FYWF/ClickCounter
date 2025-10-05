@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.res.painterResource
 
 // 为 Context 添加 DataStore 扩展属性
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "counter_preferences")
@@ -89,13 +90,14 @@ fun CounterApp() {
                         preferences[counterKey] = count
                     }
                 }
-            }, shape = RoundedCornerShape(6.dp)
+            },
+            shape = RoundedCornerShape(12.dp),
+            modifier = Modifier.size(64.dp), // 设置正方形大小
+            contentPadding = PaddingValues(0.dp) // 移除默认内边距
         ) {
-            Text(
-                text = "Click here",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontSize = 24.sp
-                )
+            Icon(
+                painter = painterResource(id = R.drawable.add_48px),
+                contentDescription = "This is a add icon" // 用于无障碍访问，必填
             )
         }
     }
