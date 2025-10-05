@@ -48,7 +48,7 @@ jobs:
 
       - name: Download bundletool
         run: |
-          curl -L "https://github.com/google/bundletool/releases/latest/download/bundletool-all.jar" -o bundletool.jar
+          curl -L "https://github.com/google/bundletool/releases/download/1.18.2/bundletool-all-1.18.2.jar" -o bundletool.jar
 
       - name: Generate .apks from .aab
         run: |
